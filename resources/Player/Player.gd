@@ -1,9 +1,9 @@
 extends KinematicBody2D
 
-const MAX_SPEED = 100
-const ROLL_SPEED = 160
-const ACCEL = 500
-const FRICTION = 500
+export (int) var MAX_SPEED = 100
+export (int) var ROLL_SPEED = 160
+export (int) var ACCEL = 500
+export (int) var FRICTION = 500
 
 enum {
 	MOVE,
@@ -19,9 +19,11 @@ var roll_vector = Vector2.DOWN
 onready var animationPlayer = $AnimationPlayer
 onready var animationTree = $AnimationTree
 onready var animationState = animationTree.get("parameters/playback")
+onready var swordHitbox = $HitboxPivot/SwordHitbox
 	
 func _ready():
 	animationTree.active = true	
+	swordHitbox.knockback_vector = roll_vector
 	
 func _process(delta):
 	
@@ -46,6 +48,9 @@ func movement(delta):
 	
 	if input_vector != 	Vector2.ZERO:
 		roll_vector = input_vector
+		
+		swordHitbox.knockback_vector = input_vector
+		
 		animationTree.set("parameters/Idle/blend_position", input_vector)
 		animationTree.set("parameters/Run/blend_position", input_vector)
 		animationTree.set("parameters/Attack/blend_position", input_vector)
