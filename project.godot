@@ -18,6 +18,10 @@ _global_script_class_icons={
 config/name="Actio Rpg Reprise"
 run/main_scene="res://World.tscn"
 
+[autoload]
+
+PlayerStats="*res://resources/Player/PlayerStats.tscn"
+
 [display]
 
 window/size/width=320
