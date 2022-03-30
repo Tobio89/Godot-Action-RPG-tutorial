@@ -8,10 +8,13 @@ export (int) var ACCELERATION = 300
 export (int) var MAX_SPEED = 50
 export (int) var FRICTION = 200
 
+export (float) var INVIN = 0.2
+
 onready var stats = $Stats
 onready var anim = $BatAnimSprite
 onready var playerDetection = $PlayerDetectionZone
 onready var batSprite = $BatAnimSprite
+onready var hurtbox = $Hurtbox
 
 const DeathEffect = preload("res://resources/Effects/EnemyDeath.tscn")
 
@@ -67,8 +70,11 @@ func die():
 func _on_Hurtbox_area_entered(area):
 	knockback = area.knockback_vector * 160
 	stats.health -= area.damage
+	hurtbox.start_invincibility(INVIN)
+	hurtbox.create_hit_effect()
+	
 	if stats.health > 0:
-		print("Bat says, 'Ouch'", stats.health)
+		print("Bat says, 'Ouch' ", stats.health)
 
 
 func _on_Stats_no_health():

@@ -5,6 +5,8 @@ export (int) var ROLL_SPEED = 160
 export (int) var ACCEL = 500
 export (int) var FRICTION = 500
 
+export (float) var INVIN = 0.5
+
 enum {
 	MOVE,
 	ROLL,
@@ -21,8 +23,10 @@ onready var animationPlayer = $AnimationPlayer
 onready var animationTree = $AnimationTree
 onready var animationState = animationTree.get("parameters/playback")
 onready var swordHitbox = $HitboxPivot/SwordHitbox
+onready var hurtbox = $Hurtbox
 	
 func _ready():
+	stats.connect("no_health", self, "queue_free")
 	animationTree.active = true	
 	swordHitbox.knockback_vector = roll_vector
 	
@@ -90,3 +94,9 @@ func end_attack():
 	
 func end_roll():
 	state = MOVE
+
+
+func _on_Hurtbox_area_entered(area):
+	hurtbox.start_invincibility(INVIN)
+	hurtbox.create_hit_effect()
+	stats.health -= 1
