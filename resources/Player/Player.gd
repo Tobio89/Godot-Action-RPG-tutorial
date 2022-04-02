@@ -5,7 +5,8 @@ export (int) var ROLL_SPEED = 160
 export (int) var ACCEL = 500
 export (int) var FRICTION = 500
 
-export (float) var INVIN = 0.5
+export (float) var INVINCIBILITY_DURATION = 0.5
+export (bool) var HAMMER_TIME = false
 
 enum {
 	MOVE,
@@ -97,6 +98,7 @@ func end_roll():
 
 
 func _on_Hurtbox_area_entered(area):
-	hurtbox.start_invincibility(INVIN)
-	hurtbox.create_hit_effect()
-	stats.health -= 1
+	if !HAMMER_TIME:
+		hurtbox.start_invincibility(INVINCIBILITY_DURATION)
+		hurtbox.create_hit_effect()
+		stats.health -= 1

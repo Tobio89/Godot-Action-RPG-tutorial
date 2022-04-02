@@ -10,11 +10,13 @@ export (int) var FRICTION = 200
 
 export (float) var INVIN = 0.2
 
-onready var stats = $Stats
 onready var anim = $BatAnimSprite
-onready var playerDetection = $PlayerDetectionZone
 onready var batSprite = $BatAnimSprite
 onready var hurtbox = $Hurtbox
+onready var playerDetection = $PlayerDetectionZone
+onready var softCollision = $SoftCollision
+onready var stats = $Stats
+onready var wanderController = $WanderController
 
 const DeathEffect = preload("res://resources/Effects/EnemyDeath.tscn")
 
@@ -27,8 +29,9 @@ enum {
 var state = IDLE
 
 func _ready():
+	randomize()
+	anim.frame = rand_range(0, anim.frames.get_frame_count("Fly")-1)
 	anim.play()
-	print(stats.health)
 	
 func _physics_process(delta):
 	knockback = knockback.move_toward(Vector2.ZERO, FRICTION * delta)
@@ -38,25 +41,51 @@ func _physics_process(delta):
 		IDLE:
 			velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
 			seek_player()
-			
+			handle_wander_timer_elapsed()
+
 		WANDER:
-			pass
+			seek_player()
+			handle_wander_timer_elapsed()
+			var direction = global_position.direction_to(wanderController.target_position)
+			velocity = velocity.move_toward(direction * MAX_SPEED, ACCELERATION * delta)
+			
+			if global_position.distance_to(wanderController.target_position) <= MAX_SPEED * delta:
+				renew_wander_timer()
+					
+			
 			
 		CHASE:
 			var player = playerDetection.player
 			if player != null:
-				var direction = (player.global_position - global_position).normalized()
+				var direction = global_position.direction_to(player.global_position)
 				velocity = velocity.move_toward(direction * MAX_SPEED, ACCELERATION * delta)	
 			else:
 				state = IDLE
 		
-	batSprite.flip_h = velocity.x < 0
+	if softCollision.is_colliding():
+		velocity += softCollision.get_push_vector() * delta * 1000
 	velocity = move_and_slide(velocity)	
+	batSprite.flip_h = velocity.x < 0
 	
 func seek_player():
 	if playerDetection.can_see_player():
 		state = CHASE	
+
+func handle_wander_timer_elapsed():
+	if wanderController.get_time_left() == 0:
+		renew_wander_timer()
+
+
+func renew_wander_timer():
+	state = pick_random_state([IDLE, WANDER])
+	wanderController.start_wander_timer(rand_range(2, 5))
+
+func pick_random_state(state_list):
+	state_list.shuffle()
+	return state_list.pop_front()
 	
+
+
 func do_death_effect():
 	var deathEffectInst = DeathEffect.instance()
 	deathEffectInst.global_position = global_position
