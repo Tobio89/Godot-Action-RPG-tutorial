@@ -13,6 +13,7 @@ export (float) var INVIN = 0.2
 onready var anim = $BatAnimSprite
 onready var batSprite = $BatAnimSprite
 onready var hurtbox = $Hurtbox
+onready var hitFlashPlayer = $HitFlashPlayer
 onready var playerDetection = $PlayerDetectionZone
 onready var softCollision = $SoftCollision
 onready var stats = $Stats
@@ -109,3 +110,11 @@ func _on_Hurtbox_area_entered(area):
 func _on_Stats_no_health():
 	print("Bat says, 'Aaaa'")
 	die()
+
+
+func _on_Hurtbox_invincibility_ended():
+	hitFlashPlayer.play("Stop")
+	
+func _on_Hurtbox_invincibility_started():
+	hitFlashPlayer.play("Flash")
+
